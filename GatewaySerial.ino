@@ -46,10 +46,14 @@
 
 // Set LOW transmit power level as default, if you have an amplified NRF-module and
 // power your radio separately with a good regulator you can turn up PA level.
-#define MY_RF24_PA_LEVEL RF24_PA_LOW
+// PA levels: RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
+// data rates, RF24_1MBPS, RF24_2MBPS, RF24_250KBPS
+#define MY_RF24_PA_LEVEL RF24_PA_LOW    // default value is MAX!
+#define MY_RF24_DATARATE RF24_250KBPS   // default value 250Kbps
 
-// Enable serial gateway
-#define MY_GATEWAY_SERIAL
+// Enable gateway
+#define MY_GATEWAY_SERIAL // start with the serial gateway
+// #define MY_GATEWAY_PARTICLE // Todo: add support for ethernet
 
 // Define a lower baud rate for Arduino's running on 8 MHz (Arduino Pro Mini 3.3V & SenseBender)
 #if F_CPU == 8000000L

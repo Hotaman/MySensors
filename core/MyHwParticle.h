@@ -16,14 +16,10 @@
  * modify it under the terms of the GNU General Public License
  * version 2 as published by the Free Software Foundation.
  */
-#ifndef MyHwESP8266_h
-#define MyHwESP8266_h
+#ifndef MyHwPARTICLE_h
+#define MyHwPARTICLE_h
 
 #include "MyHw.h"
-
-#ifdef __cplusplus
-#include <Arduino.h>
-#endif
 
 #define MY_SERIALDEVICE Serial
 
@@ -32,18 +28,18 @@
 
 
 // Define these as macros to save valuable space
-#define hwDigitalWrite(__pin, __value) digitalWrite(__pin, __value)
-#define hwDigitalRead(__pin) digitalRead(__pin)
+#define hwDigitalWrite(__pin, __value) digitalWriteFast(__pin, __value)
+#define hwDigitalRead(__pin) pinReadFast(__pin)
 #define hwPinMode(__pin, __value) pinMode(__pin, __value)
 
 #if defined(MY_DISABLED_SERIAL)
 	#define hwInit()
 #else
-	#define hwInit() MY_SERIALDEVICE.begin(MY_BAUD_RATE, SERIAL_8N1, MY_ESP8266_SERIAL_MODE, 1); MY_SERIALDEVICE.setDebugOutput(true)
+	#define hwInit() MY_SERIALDEVICE.begin(MY_BAUD_RATE)
 #endif
 
-#define hwWatchdogReset() wdt_reset()
-#define hwReboot() ESP.restart()
+#define hwWatchdogReset() ApplicationWatchdog.checkin()  // wdt_reset()
+#define hwReboot() System.reset()
 #define hwMillis() millis()
 #define hwRandomNumberInit() randomSeed(analogRead(MY_SIGNING_SOFT_RANDOMSEED_PIN))
 
@@ -52,17 +48,9 @@ void hwWriteConfigBlock(void* buf, void* adr, size_t length);
 void hwWriteConfig(int adr, uint8_t value);
 uint8_t hwReadConfig(int adr);
 
-/**
- * Restore interrupt state.
- * Helper function for MY_CRITICAL_SECTION.
- */
-static __inline__ void __psRestore(const uint32_t *__s)
-{
-    xt_wsr_ps( *__s );
-}
 
 #ifndef DOXYGEN
-	#define MY_CRITICAL_SECTION    for ( uint32_t __psSaved __attribute__((__cleanup__(__psRestore))) = xt_rsil(15), __ToDo = 1; __ToDo ; __ToDo = 0 )
+	#define MY_CRITICAL_SECTION   ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 #endif  /* DOXYGEN */
 
-#endif // #ifdef ARDUINO_ARCH_ESP8266
+// #endif // #ifdef ARDUINO_ARCH_ESP8266

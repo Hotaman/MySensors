@@ -15,10 +15,13 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * version 2 as published by the Free Software Foundation.
+ *
+ * Particle device support added by Hotaman 11/2016
+ * Support for Photon 11/2016
+ * Support for Electron TBD
  */
 
-#include "MyHwESP8266.h"
-#include <EEPROM.h>
+#include "MyHwParticle.h"
 
 /*
 int8_t pinIntTrigger = 0;
@@ -40,19 +43,8 @@ ISR (WDT_vect)
 }
 */
 
-static void hwInitConfigBlock( size_t length = 1024 /*ATMega328 has 1024 bytes*/ )
-{
-  static bool initDone = false;
-  if (!initDone)
-  {
-    EEPROM.begin(length);
-    initDone = true;
-  }
-}
-
 void hwReadConfigBlock(void* buf, void* adr, size_t length)
 {
-  hwInitConfigBlock();
   uint8_t* dst = static_cast<uint8_t*>(buf);
   int offs = reinterpret_cast<int>(adr);
   while (length-- > 0)
@@ -63,7 +55,6 @@ void hwReadConfigBlock(void* buf, void* adr, size_t length)
 
 void hwWriteConfigBlock(void* buf, void* adr, size_t length)
 {
-  hwInitConfigBlock();
   uint8_t* src = static_cast<uint8_t*>(buf);
   int offs = reinterpret_cast<int>(adr);
   while (length-- > 0)
@@ -115,20 +106,19 @@ int8_t hwSleep(uint8_t interrupt1, uint8_t mode1, uint8_t interrupt2, uint8_t mo
 }
 
 #if defined(MY_DEBUG) || defined(MY_SPECIAL_DEBUG)
-ADC_MODE(ADC_VCC);
 
 uint16_t hwCPUVoltage() {
 	// in mV
-	return ESP.getVcc();
+	return 3300;  // Should be always plugged in! Electron has a fuel gauge for the batt!
 }
 
 uint16_t hwCPUFrequency() {
 	// in 1/10Mhz
-	return ESP.getCpuFreqMHz()*10;
+	return 120000000;  //120MHZ
 }
 
 uint16_t hwFreeMem() {
-	return ESP.getFreeHeap();
+	return System.freeMemory();
 }
 #endif
 
